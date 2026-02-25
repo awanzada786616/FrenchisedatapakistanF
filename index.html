@@ -19,39 +19,40 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
         body { background: var(--bg); color: #1e293b; }
 
-        /* Security Headers & Watermarks */
+        /* Security Elements */
         .security-header { background: #1e293b; color: #fff; padding: 8px; font-size: 10px; font-weight: 800; text-align: center; border-radius: 8px 8px 0 0; letter-spacing: 1px; }
         .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 35px; color: rgba(0,0,0,0.05); font-weight: 900; white-space: nowrap; pointer-events: none; z-index: 1; }
 
-        /* Auth UI */
-        #auth-section { height: 100vh; display: flex; align-items: center; justify-content: center; }
-        .login-card { background: #fff; width: 380px; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; }
-        .auth-input { width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid #e2e8f0; border-radius: 10px; outline: none; background: #f8fafc; }
-        .btn-blue { width: 100%; padding: 14px; background: var(--primary); color: #fff; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; }
+        /* Login UI */
+        #auth-section { height: 100vh; display: flex; align-items: center; justify-content: center; background: #f4f7fa; }
+        .login-card { background: #fff; width: 100%; max-width: 400px; padding: 40px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); text-align: center; }
+        .auth-input { width: 100%; padding: 15px; margin-bottom: 12px; border: 1px solid #e2e8f0; border-radius: 12px; outline: none; background: #f8fafc; }
+        .btn-login { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; }
         .btn-wa { display: block; margin-top: 20px; color: var(--whatsapp); text-decoration: none; font-weight: 700; }
 
-        /* Dashboard UI */
-        nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 6%; background: #fff; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 1000; }
-        .badge { background: #eff6ff; padding: 6px 12px; border-radius: 50px; font-size: 12px; font-weight: 700; color: var(--primary); border: 1px solid #dbeafe; }
+        /* Nav */
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 6%; background: #fff; border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 1000; }
+        .badge { background: #eff6ff; padding: 8px 15px; border-radius: 50px; font-weight: 700; font-size: 13px; color: var(--primary); border: 1px solid #dbeafe; }
 
         #app-container { max-width: 850px; margin: 30px auto; padding: 0 15px; display: none; }
-        .search-card { background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); margin-bottom: 25px; }
+        .search-card { background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .search-group { display: flex; gap: 10px; }
         .search-group input { flex: 1; padding: 15px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 16px; outline: none; }
+        .btn-search { padding: 0 35px; background: var(--primary); color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; }
 
         /* Result Styles */
         .result-wrapper { position: relative; display: none; margin-top: 20px; }
         .result-container { background: #fff; padding: 45px; border: 1px solid #bbb; position: relative; color: #333; line-height: 1.3; overflow: hidden; }
-        .cert-logo { width: 180px; height: 65px; object-fit: contain; }
         .val { font-weight: bold; color: #000; font-size: 16px; }
+        .cert-logo { width: 180px; height: 65px; object-fit: contain; }
 
         #jazz-box { border-radius: 10px; background: #fff; padding: 25px; border: 1px solid #ddd; position: relative; overflow: hidden; }
-        .jazz-table { width: 100%; border-collapse: collapse; margin-top: 15px; position: relative; z-index: 5; border: 1px solid #ddd; }
+        .jazz-table { width: 100%; border-collapse: collapse; margin-top: 15px; border: 1px solid #ddd; position: relative; z-index: 5; }
         .jazz-table th { background: var(--jazz-red); color: #fff; padding: 12px; text-align: left; }
         .jazz-table td { padding: 12px; border: 1px solid #ddd; font-weight: 700; }
 
-        .btn-png { background: #22c55e; color: white; padding: 15px; border-radius: 10px; border: none; width: 100%; font-weight: 700; margin-top: 20px; cursor: pointer; display: none; }
         .loader { display: none; text-align: center; padding: 20px; font-weight: 800; color: var(--primary); }
+        .btn-png { background: #22c55e; color: white; padding: 15px; border-radius: 10px; border: none; width: 100%; font-weight: 700; margin-top: 20px; cursor: pointer; display: none; }
     </style>
 </head>
 <body>
@@ -59,40 +60,40 @@
     <!-- AUTH SECTION -->
     <div id="auth-section">
         <div class="login-card">
-            <h2 style="margin-bottom:20px;">FRANCHISE LOGIN</h2>
+            <h2>FRANCHISE LOGIN</h2>
             <input type="email" id="email" class="auth-input" placeholder="Operator Email">
             <input type="password" id="password" class="auth-input" placeholder="Access Key">
-            <button onclick="handleLogin()" class="btn-blue">LOGIN ACCESS</button>
+            <button onclick="handleLogin()" class="btn-login">LOGIN ACCESS</button>
             <a href="https://wa.me/994401879953" class="btn-wa"><i class="fab fa-whatsapp"></i> BUY LOGIN ACCESS</a>
         </div>
     </div>
 
     <!-- MAIN APP -->
     <div id="app-container">
-        <nav style="padding: 15px 0; background:none; border:none;">
+        <nav style="padding: 15px 0; background:none; border:none; margin-bottom:20px;">
             <div style="font-weight:800;">FRANCHISE<span>DATABASE</span></div>
             <div style="display:flex; gap:10px;">
                 <div class="badge">COINS: <span id="u-coins">0</span></div>
-                <div class="badge" style="color:red;">EXPIRY: <span id="u-exp">---</span></div>
+                <div class="badge" style="color:red;">EXP: <span id="u-exp">---</span></div>
                 <button onclick="firebase.auth().signOut()" style="border:none; background:none; cursor:pointer;"><i class="fas fa-power-off"></i></button>
             </div>
         </nav>
 
         <div class="search-card">
             <div class="search-group">
-                <input type="number" id="mobileNumber" placeholder="03XXXXXXXXX" oninput="if(this.length > 11) this.value = this.value.slice(0,11)">
-                <button onclick="startSearch()" class="btn-blue" style="width:150px;">SEARCH</button>
+                <input type="number" id="mobileNumber" placeholder="03XXXXXXXXX">
+                <button onclick="startSearch()" class="btn-search">SEARCH</button>
             </div>
         </div>
 
         <div class="loader" id="loader"><i class="fas fa-sync fa-spin"></i> SECURITY AUTHORIZATION IN PROGRESS...</div>
         <div id="success-msg" style="display:none; text-align:center; color:green; font-weight:700; margin-bottom:10px;">Thanks for waiting, your data is ready!</div>
 
-        <!-- CERTIFICATE LAYOUT -->
+        <!-- CERTIFICATE WRAPPER -->
         <div id="cert-wrapper" class="result-wrapper">
-            <div class="security-header">AUTHORIZED API ACCESS: +994401879953</div>
+            <div class="security-header" id="c-header-val">AUTHORIZED API ACCESS</div>
             <div class="result-container">
-                <div class="watermark">+994401879953</div>
+                <div class="watermark" id="c-watermark-val">+994401879953</div>
                 <div style="display:flex; justify-content:space-between; position:relative; z-index:10;">
                     <div style="font-size:11px; width: 55%;">
                         MOBILE#: <span class="val" id="c-mob">---</span><br><br>
@@ -112,11 +113,11 @@
             </div>
         </div>
 
-        <!-- JAZZ LAYOUT -->
+        <!-- JAZZ WRAPPER -->
         <div id="jazz-wrapper" class="result-wrapper">
-            <div class="security-header">AUTHORIZED API ACCESS: +994401879953</div>
+            <div class="security-header" id="j-header-val">AUTHORIZED API ACCESS</div>
             <div id="jazz-box">
-                <div class="watermark">+994401879953</div>
+                <div class="watermark" id="j-watermark-val">+994401879953</div>
                 <div style="display:flex; justify-content:space-between; align-items:center; position:relative; z-index:10;">
                     <img src="jazz.png" style="height:50px;">
                     <div style="font-size:12px; font-weight:800; color:var(--jazz-red);">JAZZ FRANCHISE RECORD</div>
@@ -128,7 +129,7 @@
             </div>
         </div>
 
-        <button id="download-btn" class="btn-png" onclick="downloadPNG()"><i class="fas fa-image"></i> DOWNLOAD REPORT</button>
+        <button id="download-btn" class="btn-png" onclick="downloadPNG()"><i class="fas fa-image"></i> DOWNLOAD PNG REPORT</button>
 
         <div style="font-family:'Jameel Noori', serif; text-align:center; font-size:24px; margin-top:30px; background:#fff; padding:20px; border-radius:12px; border:1px dashed var(--primary); direction:rtl;">
             کوئن خریدنے کے لیے اس نمبر پر رابطہ کریں: +994401879953
@@ -136,7 +137,7 @@
     </div>
 
 <script>
-    // --- FIREBASE CONFIG (ORIGINAL) ---
+    // --- FIREBASE CONFIG (SAMI RAKHAIN) ---
     const firebaseConfig = {
         apiKey: "AIzaSyA8iI7uZptTD7kmQ3KZFD-evTzzh36Vo-8",
         authDomain: "wasihosting.firebaseapp.com",
@@ -161,9 +162,11 @@
             document.getElementById('auth-section').style.display = 'none';
             document.getElementById('app-container').style.display = 'block';
             db.collection('users').doc(user.uid).onSnapshot(doc => {
-                uData = doc.data();
-                document.getElementById('u-coins').innerText = uData.coins;
-                document.getElementById('u-exp').innerText = uData.validTo || "PERMANENT";
+                if(doc.exists) {
+                    uData = doc.data();
+                    document.getElementById('u-coins').innerText = uData.coins;
+                    document.getElementById('u-exp').innerText = uData.validTo || "PERMANENT";
+                }
             });
         } else {
             document.getElementById('auth-section').style.display = 'flex';
@@ -175,47 +178,48 @@
         const ph = document.getElementById('mobileNumber').value;
         if(ph.length < 10) return alert("Invalid Number");
 
-        if(!navigator.onLine) return alert("Internet Required!");
-
+        if(!navigator.onLine) return alert("Check Internet!");
+        
+        // Expiry Check
         const today = new Date().toISOString().split('T')[0];
-        if(uData.validTo && today > uData.validTo) return alert("ACCOUNT EXPIRED! Contact Admin.");
-        if(uData.coins < 1) return alert("INSUFFICIENT COINS!");
+        if(uData.validTo && today > uData.validTo) return alert("EXPIRED!");
+        
+        // Coin Check
+        if(uData.coins < 1) return alert("NO COINS!");
 
-        // Reset UI
-        document.getElementById('loader').style.display = 'block';
-        ['cert-wrapper','jazz-wrapper','download-btn','success-msg'].forEach(id => document.getElementById(id).style.display = 'none');
-
-        // Check Local Cache
-        const cacheKey = "FRAN_STABLE_V20_" + ph;
+        // Cache Check
+        const cacheKey = "FRAN_STABLE_V22_" + ph;
         const cached = localStorage.getItem(cacheKey);
         if(cached) {
-            setTimeout(() => { render(JSON.parse(cached), ph); document.getElementById('loader').style.display = 'none'; }, 600);
+            render(JSON.parse(cached), ph);
             return;
         }
 
+        document.getElementById('loader').style.display = 'block';
+        ['cert-wrapper','jazz-wrapper','download-btn','success-msg'].forEach(id => document.getElementById(id).style.display = 'none');
+
         try {
-            // 1. Get Firebase ID Token (Authorization)
-            const idToken = await firebase.auth().currentUser.getIdToken();
-
-            // 2. Call your Vercel Backend
-            const res = await fetch(`/api/search?number=${ph}`, {
-                headers: { 'Authorization': `Bearer ${idToken}` }
-            });
-
+            const res = await fetch(`/api/search?number=${ph}`);
             const result = await res.json();
 
             if (result.success) {
-                // Deducting coin logic handled on backend already (highly secure)
-                localStorage.setItem(cacheKey, JSON.stringify(result.data));
-                render(result.data, ph);
+                // Deduct coin on frontend (Safe way)
+                await db.collection('users').doc(auth.currentUser.uid).update({
+                    coins: firebase.firestore.FieldValue.increment(-1)
+                });
+                
+                localStorage.setItem(cacheKey, JSON.stringify(result));
+                render(result, ph);
             } else {
-                alert("Error: " + (result.msg || "Server Reject"));
+                alert("Server Connection Error");
             }
         } catch(e) { alert("Mainframe connection error."); }
         document.getElementById('loader').style.display = 'none';
     }
 
-    function render(data, ph) {
+    function render(res, ph) {
+        const data = res.data;
+        const owner = res.owner || "+994401879953";
         const clean = (ph.startsWith('0') ? ph.substring(1) : ph).substring(0, 3);
         const isJazz = ['300','301','302','303','304','305','306','307','308','309'].includes(clean);
         const isZong = ['310','311','312','313','314','315','316','317','318','319','370'].includes(clean);
@@ -226,9 +230,13 @@
 
         if(isJazz) {
             document.getElementById('jazz-wrapper').style.display = 'block';
+            document.getElementById('j-header-val').innerText = "AUTHORIZED API ACCESS: " + owner;
+            document.getElementById('j-watermark-val').innerText = owner;
             ['j-mob','j-name','j-cnic','j-addr'].forEach((id, i) => document.getElementById(id).innerText = [ph, data.n, data.c, data.a][i]);
         } else {
             document.getElementById('cert-wrapper').style.display = 'block';
+            document.getElementById('c-header-val').innerText = "AUTHORIZED API ACCESS: " + owner;
+            document.getElementById('c-watermark-val').innerText = owner;
             let logo = isZong ? "zong.png" : (isUfone ? "ufone.png" : "telenor.png");
             document.getElementById('cert-logo-img').src = logo;
             ['c-mob','c-name','c-cnic','c-addr'].forEach((id, i) => document.getElementById(id).innerText = [ph, data.n, data.c, data.a][i]);
@@ -239,7 +247,7 @@
         const targetId = document.getElementById('jazz-wrapper').style.display === 'block' ? 'jazz-wrapper' : 'cert-wrapper';
         html2canvas(document.getElementById(targetId), { scale: 3, backgroundColor: "#f4f7fa" }).then(canvas => {
             const link = document.createElement('a');
-            link.download = `FRANCHISE_REPORT_${document.getElementById('mobileNumber').value}.png`;
+            link.download = `Report_${document.getElementById('mobileNumber').value}.png`;
             link.href = canvas.toDataURL();
             link.click();
         });
