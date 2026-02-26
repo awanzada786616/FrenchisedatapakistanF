@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FRANCHISE DATABASE | PRO 2026</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        @font-face { font-family: 'Jameel Noori'; src: url('https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts/unhinted/ttf/NotoNastaliqUrdu/NotoNastaliqUrdu-Regular.ttf'); }
+        :root { --primary: #007bff; --bg: #f8fafc; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: #1e293b; }
+
+        /* Security Headers */
+        .security-header { background: #1e293b; color: #fff; padding: 8px; font-size: 10px; font-weight: 800; text-align: center; border-radius: 8px 8px 0 0; }
+        .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-25deg); font-size: 30px; color: rgba(0,0,0,0.04); font-weight: 900; white-space: nowrap; pointer-events: none; z-index: 1; }
+
+        /* Auth UI */
+        #auth-section { height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .login-card { background: #fff; width: 380px; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; }
+        .auth-input { width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid #e2e8f0; border-radius: 10px; outline: none; }
+        .btn-blue { width: 100%; padding: 14px; background: var(--primary); color: #fff; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; }
+
+        /* Search Area */
+        #app-container { max-width: 800px; margin: 30px auto; padding: 0 15px; display: none; }
+        .search-card { background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 25px; }
+        .search-tabs { display: flex; gap: 10px; margin-bottom: 15px; justify-content: center; }
+        .tab-btn { padding: 8px 20px; border-radius: 50px; border: 1px solid #ddd; background: #fff; cursor: pointer; font-size: 12px; font-weight: 700; }
+        .tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+        .search-group { display: flex; gap: 10px; }
+        .search-group input { flex: 1; padding: 15px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 16px; outline: none; }
+
+        /* THE WHITE PAGE REPORT */
+        .result-wrapper { position: relative; display: none; margin-top: 20px; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
+        .white-page { background: #fff; padding: 50px; min-height: 400px; position: relative; color: #000; }
+        .wp-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 30px; }
+        .wp-logo { height: 80px; object-fit: contain; }
+        .wp-title { text-align: right; font-weight: 800; font-size: 14px; line-height: 1.2; }
+
+        .data-grid { display: grid; gap: 25px; position: relative; z-index: 5; }
+        .data-item { border-left: 3px solid #000; padding-left: 15px; }
+        .data-label { font-size: 11px; font-weight: 800; color: #666; text-transform: uppercase; margin-bottom: 5px; }
+        .data-val { font-size: 18px; font-weight: 700; color: #000; }
+
+        .wp-footer { margin-top: 50px; border-top: 1px solid #eee; padding-top: 15px; font-size: 11px; color: #888; font-style: italic; }
+
+        .badge { background: #fff; border: 1px solid #000; padding: 6px 12px; border-radius: 50px; font-size: 12px; font-weight: 700; }
+        .loader { display: none; text-align: center; padding: 20px; font-weight: 800; color: var(--primary); }
+        .btn-png { background: #10b981; color: white; padding: 15px; border-radius: 10px; border: none; width: 100%; font-weight: 700; margin-top: 20px; cursor: pointer; display: none; }
+    </style>
+</head>
+<body>
+
+    <!-- AUTH SECTION -->
+    <div id="auth-section">
+        <div class="login-card">
+            <h2 style="margin-bottom:20px;">SECURE LOGIN</h2>
+            <input type="email" id="email" class="auth-input" placeholder="Email Address">
+            <input type="password" id="password" class="auth-input" placeholder="Password">
+            <button onclick="handleAuth()" class="btn-blue">AUTHORIZE</button>
+            <a href="https://wa.me/994401879953" style="display:block; margin-top:20px; color:green; text-decoration:none; font-weight:700;"><i class="fab fa-whatsapp"></i> BUY ACCESS</a>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="app-container">
+        <nav style="display:flex; justify-content:space-between; margin-bottom:20px; align-items:center;">
+            <div style="font-weight:800; font-size:18px;">FRANCHISE<span>DATABASE</span></div>
+            <div style="display:flex; gap:10px;">
+                <div class="badge">COINS: <span id="u-coins">0</span></div>
+                <button onclick="firebase.auth().signOut()" style="border:none; background:none; cursor:pointer;"><i class="fas fa-power-off"></i></button>
+            </div>
+        </nav>
+
+        <div class="search-card">
+            <div class="search-tabs">
+                <button class="tab-btn active" id="tab-num" onclick="setMode('number')">MOBILE SEARCH</button>
+                <button class="tab-btn" id="tab-cnic" onclick="setMode('cnic')">CNIC SEARCH</button>
+            </div>
+            <div class="search-group">
+                <input type="number" id="targetInput" placeholder="03XXXXXXXXX">
+                <button onclick="startSearch()" class="btn-blue" style="width:120px;">SEARCH</button>
+            </div>
+        </div>
+
+        <div class="loader" id="loader"><i class="fas fa-sync fa-spin"></i> QUERYING SERVER...</div>
+
+        <!-- THE WHITE PAGE REPORT WRAPPER -->
+        <div id="wp-wrapper" class="result-wrapper">
+            <div class="security-header" id="wp-security-header">AUTHORIZED API ACCESS: +994401879953</div>
+            <div class="white-page" id="capture-area">
+                <div class="watermark">+994401879953</div>
+                
+                <div class="wp-header">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSv4bFcYuiV-AsevQZkt6ybEsddV0nSFKglLliYK3n4EQ&s=10" class="wp-logo">
+                    <div class="wp-title">
+                        OFFICIAL DATA REPORT<br>
+                        <span style="font-size:10px; font-weight:400;">DATE: 25 FEB 2026</span>
+                    </div>
+                </div>
+
+                <div class="data-grid">
+                    <div class="data-item">
+                        <div class="data-label">Full Registered Name</div>
+                        <div class="data-val" id="wp-name">---</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Identification Number (CNIC)</div>
+                        <div class="data-val" id="wp-cnic" style="letter-spacing:1px;">---</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Search Identity (Mobile/Track)</div>
+                        <div class="data-val" id="wp-track">---</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Permanent Registered Address</div>
+                        <div class="data-val" id="wp-addr" style="font-size:14px;">---</div>
+                    </div>
+                </div>
+
+                <div class="wp-footer">
+                    * This information is electronically retrieved and certified for official operator use only.
+                </div>
+            </div>
+        </div>
+
+        <button id="download-btn" class="btn-png" onclick="downloadPNG()"><i class="fas fa-file-download"></i> DOWNLOAD REPORT (PNG)</button>
+
+        <div style="font-family:'Jameel Noori', serif; text-align:center; font-size:24px; margin-top:30px; background:#fff; padding:20px; border-radius:12px; border:1px dashed #000; direction:rtl;">
+            کوئن خریدنے کے لیے اس نمبر پر رابطہ کریں: +994401879953
+        </div>
+    </div>
+
+<script>
+    let searchMode = 'number';
+    // --- FIREBASE CONFIG (Add yours here) ---
+    const firebaseConfig = { apiKey: "AIzaSyA8iI7uZptTD7kmQ3KZFD-evTzzh36Vo-8", authDomain: "wasihosting.firebaseapp.com", projectId: "wasihosting", storageBucket: "wasihosting.firebasestorage.app", messagingSenderId: "983134727124", appId: "1:983134727124:web:25914abca24ac1d1dd0441" };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    let uData = null;
+
+    function setMode(mode) {
+        searchMode = mode;
+        document.getElementById('tab-num').className = mode === 'number' ? 'tab-btn active' : 'tab-btn';
+        document.getElementById('tab-cnic').className = mode === 'cnic' ? 'tab-btn active' : 'tab-btn';
+        document.getElementById('targetInput').placeholder = mode === 'number' ? '03XXXXXXXXX' : 'Enter CNIC Without Dashes';
+    }
+
+    async function handleAuth() {
+        const e = document.getElementById('email').value, p = document.getElementById('password').value;
+        try { await auth.signInWithEmailAndPassword(e, p); } catch(err) { alert(err.message); }
+    }
+
+    auth.onAuthStateChanged(user => {
+        if(user) {
+            document.getElementById('auth-section').style.display = 'none';
+            document.getElementById('app-container').style.display = 'block';
+            db.collection('users').doc(user.uid).onSnapshot(doc => { uData = doc.data(); document.getElementById('u-coins').innerText = uData.coins; });
+        } else {
+            document.getElementById('auth-section').style.display = 'flex';
+            document.getElementById('app-container').style.display = 'none';
+        }
+    });
+
+    async function startSearch() {
+        const val = document.getElementById('targetInput').value;
+        if(val.length < 10) return alert("Invalid Input");
+        if(uData.coins < 1) return alert("NO COINS!");
+
+        document.getElementById('loader').style.display = 'block';
+        document.getElementById('wp-wrapper').style.display = 'none';
+        document.getElementById('download-btn').style.display = 'none';
+
+        try {
+            const res = await fetch(`/api/search?number=${val}`);
+            const result = await res.json();
+
+            if (result.success) {
+                await db.collection('users').doc(auth.currentUser.uid).update({ coins: firebase.firestore.FieldValue.increment(-1) });
+                renderReport(result.data, val);
+            }
+        } catch(e) { alert("Server Busy."); }
+        document.getElementById('loader').style.display = 'none';
+    }
+
+    function renderReport(data, track) {
+        document.getElementById('wp-name').innerText = data.n;
+        document.getElementById('wp-cnic').innerText = data.c;
+        document.getElementById('wp-track').innerText = track;
+        document.getElementById('wp-addr').innerText = data.a;
+        document.getElementById('wp-wrapper').style.display = 'block';
+        document.getElementById('download-btn').style.display = 'block';
+    }
+
+    function downloadPNG() {
+        html2canvas(document.getElementById('wp-wrapper'), { scale: 3, useCORS: true }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `Report_${document.getElementById('targetInput').value}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+    }
+</script>
+</body>
+</html>
