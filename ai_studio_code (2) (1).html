@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FRANCHISE DATABASE | PRO 2026</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        @font-face { font-family: 'Jameel Noori'; src: url('https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts/unhinted/ttf/NotoNastaliqUrdu/NotoNastaliqUrdu-Regular.ttf'); }
+        :root { --primary: #007bff; --bg: #f4f7fa; --jazz-red: #d32f2f; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: #1e293b; }
+
+        /* Security Elements */
+        .security-header { background: #1e293b; color: #fff; padding: 8px; font-size: 10px; font-weight: 800; text-align: center; border-radius: 8px 8px 0 0; }
+        .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 35px; color: rgba(0,0,0,0.05); font-weight: 900; white-space: nowrap; pointer-events: none; z-index: 1; }
+
+        /* Auth & Nav */
+        #auth-section { height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .login-card { background: #fff; width: 380px; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; }
+        .btn-blue { width: 100%; padding: 14px; background: var(--primary); color: #fff; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; }
+        nav { display: flex; justify-content: space-between; padding: 15px 6%; background: #fff; border-bottom: 1px solid #eee; }
+
+        /* Search Section */
+        #app-container { max-width: 850px; margin: 30px auto; padding: 0 15px; display: none; }
+        .search-card { background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); margin-bottom: 25px; }
+        .search-tabs { display: flex; gap: 10px; margin-bottom: 15px; justify-content: center; }
+        .tab-btn { padding: 8px 20px; border-radius: 50px; border: 1px solid #ddd; background: #fff; cursor: pointer; font-size: 13px; font-weight: 700; }
+        .tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+        .search-group { display: flex; gap: 10px; }
+        .search-group input { flex: 1; padding: 15px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 16px; outline: none; }
+
+        /* --- 1. JAZZ TABLE LAYOUT --- */
+        #jazz-wrapper { display: none; margin-top: 20px; position: relative; }
+        #jazz-box { border-radius: 10px; background: #fff; padding: 25px; border: 1px solid #ddd; overflow: hidden; position: relative; }
+        .jazz-table { width: 100%; border-collapse: collapse; margin-top: 15px; position: relative; z-index: 5; }
+        .jazz-table th { background: var(--jazz-red); color: #fff; padding: 12px; text-align: left; }
+        .jazz-table td { padding: 12px; border: 1px solid #ddd; font-weight: 700; }
+
+        /* --- 2. CERTIFICATE LAYOUT (ZONG/TEL/UFONE) --- */
+        #cert-wrapper { display: none; margin-top: 20px; position: relative; }
+        .result-container { background: #fff; padding: 45px; border: 1px solid #bbb; position: relative; color: #333; line-height: 1.3; overflow: hidden; }
+        .cert-logo { width: 180px; height: 65px; object-fit: contain; }
+        .val { font-weight: bold; color: #000; font-size: 16px; }
+
+        /* --- 3. CNIC WHITE PAGE LAYOUT --- */
+        #cnic-wrapper { display: none; margin-top: 20px; border: 1px solid #ddd; border-radius: 10px; overflow: hidden; position: relative; }
+        .cnic-page { background: #fff; padding: 50px; min-height: 400px; position: relative; }
+        .cnic-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 30px; }
+        .cnic-logo { height: 70px; }
+        .cnic-data-row { border-left: 4px solid #000; padding-left: 15px; margin-bottom: 25px; position: relative; z-index: 5; }
+
+        /* General */
+        .loader { display: none; text-align: center; padding: 20px; font-weight: 800; color: var(--primary); }
+        .btn-png { background: #22c55e; color: white; padding: 15px; border-radius: 10px; border: none; width: 100%; font-weight: 700; margin-top: 20px; cursor: pointer; display: none; }
+    </style>
+</head>
+<body>
+
+    <!-- AUTH SECTION -->
+    <div id="auth-section">
+        <div class="login-card">
+            <h2>FRANCHISE LOGIN</h2>
+            <input type="email" id="email" class="auth-input" placeholder="Operator Email">
+            <input type="password" id="password" class="auth-input" placeholder="Access Key">
+            <button onclick="handleAuth()" class="btn-blue">LOGIN ACCESS</button>
+            <a href="https://wa.me/994401879953" style="display:block; margin-top:20px; color:green; text-decoration:none; font-weight:700;"><i class="fab fa-whatsapp"></i> BUY ACCESS</a>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD -->
+    <div id="app-container">
+        <nav style="padding:15px 0; background:none; border:none; margin-bottom:10px;">
+            <div style="font-weight:800;">FRANCHISE<span>DATABASE</span></div>
+            <div style="display:flex; gap:10px;">
+                <div style="background:#fff; border:1px solid #000; padding:5px 15px; border-radius:50px; font-size:12px; font-weight:700;">COINS: <span id="u-coins">0</span></div>
+                <button onclick="firebase.auth().signOut()"><i class="fas fa-power-off"></i></button>
+            </div>
+        </nav>
+
+        <div class="search-card">
+            <div class="search-tabs">
+                <button class="tab-btn active" id="tab-num" onclick="setMode('number')">MOBILE SEARCH</button>
+                <button class="tab-btn" id="tab-cnic" onclick="setMode('cnic')">CNIC SEARCH</button>
+            </div>
+            <div class="search-group">
+                <input type="number" id="targetInput" placeholder="03XXXXXXXXX">
+                <button onclick="startSearch()" class="btn-blue" style="width:140px;">SEARCH</button>
+            </div>
+        </div>
+
+        <div class="loader" id="loader"><i class="fas fa-sync fa-spin"></i> SECURITY AUTHORIZATION...</div>
+
+        <!-- 1. JAZZ TABLE LAYOUT -->
+        <div id="jazz-wrapper">
+            <div class="security-header">AUTHORIZED API ACCESS: +994401879953</div>
+            <div id="jazz-box">
+                <div class="watermark">+994401879953</div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <img src="jazz.png" style="height:50px;">
+                    <div style="font-size:12px; font-weight:800; color:var(--jazz-red);">JAZZ FRANCHISE RECORD</div>
+                </div>
+                <table class="jazz-table">
+                    <thead><tr><th>Mobile</th><th>Name</th><th>CNIC</th><th>Address</th></tr></thead>
+                    <tbody><tr><td id="j-mob">---</td><td id="j-name">---</td><td id="j-cnic">---</td><td id="j-addr">---</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 2. CERTIFICATE LAYOUT (ZONG/TEL/UFONE) -->
+        <div id="cert-wrapper">
+            <div class="security-header">AUTHORIZED API ACCESS: +994401879953</div>
+            <div class="result-container">
+                <div class="watermark">+994401879953</div>
+                <div style="display:flex; justify-content:space-between; position:relative; z-index:10;">
+                    <div style="font-size:11px; width: 55%;">
+                        MOBILE#: <span class="val" id="c-mob">---</span><br><br>
+                        Certified that a sum of<br>Rupees On account of Income<br>Tax has been<br>collected/deducted from<br>(Name and address of the<br>person from whom tax<br>collected/deducted) having<br>National Tax Number<br>holder of CNIC no.<br>On<br>Or during the period from *<br>On account of *<br>vide<br>On the value/amount of Rupees
+                    </div>
+                    <div style="text-align:right; width: 42%;">
+                        <img id="cert-logo-img" src="" class="cert-logo">
+                        <div style="margin-top:10px; font-size:12px;">
+                            <b>PART VII</b><br>Tax Collection Certificate<br>Date: 25 Feb 2026<br><br>
+                            <span id="c-name" class="val" style="font-size:18px;">---</span><br>0<br><br>
+                            <span id="c-cnic" class="val" style="letter-spacing:1px; font-size:17px;">---</span><br><br>
+                            <div style="margin-top:10px;">01-jul-2024 To 30-jun-2025</div><br>
+                            <span id="c-addr" class="val" style="font-size:11px; font-weight:normal;">---</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. CNIC WHITE PAGE LAYOUT -->
+        <div id="cnic-wrapper">
+            <div class="security-header">AUTHORIZED API ACCESS: +994401879953</div>
+            <div class="cnic-page">
+                <div class="watermark">+994401879953</div>
+                <div class="cnic-header">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSv4bFcYuiV-AsevQZkt6ybEsddV0nSFKglLliYK3n4EQ&s=10" class="cnic-logo">
+                    <div style="text-align:right; font-weight:800; font-size:14px;">OFFICIAL CNIC DATA REPORT<br><span style="font-weight:400; font-size:10px;">GENERATED: 25 FEB 2026</span></div>
+                </div>
+                <div class="cnic-data-row">
+                    <div style="font-size:10px; color:#666; font-weight:800;">FULL NAME</div>
+                    <div class="val" id="cnic-res-name" style="font-size:20px;">---</div>
+                </div>
+                <div class="cnic-data-row">
+                    <div style="font-size:10px; color:#666; font-weight:800;">ID NUMBER (CNIC)</div>
+                    <div class="val" id="cnic-res-id" style="letter-spacing:2px;">---</div>
+                </div>
+                <div class="cnic-data-row">
+                    <div style="font-size:10px; color:#666; font-weight:800;">PERMANENT ADDRESS</div>
+                    <div class="val" id="cnic-res-addr" style="font-size:13px; font-weight:600;">---</div>
+                </div>
+            </div>
+        </div>
+
+        <button id="download-btn" class="btn-png" onclick="downloadPNG()"><i class="fas fa-file-image"></i> DOWNLOAD PNG REPORT</button>
+
+        <div style="font-family:'Jameel Noori', serif; text-align:center; font-size:24px; margin-top:30px; background:#fff; padding:20px; border-radius:12px; border:1px dashed #000; direction:rtl;">
+            کوئن خریدنے کے لیے اس نمبر پر رابطہ کریں: +994401879953
+        </div>
+    </div>
+
+<script>
+    let mode = 'number';
+    // --- FIREBASE CONFIG (Add yours) ---
+    const firebaseConfig = { apiKey: "AIzaSyA8iI7uZptTD7kmQ3KZFD-evTzzh36Vo-8", authDomain: "wasihosting.firebaseapp.com", projectId: "wasihosting", storageBucket: "wasihosting.firebasestorage.app", messagingSenderId: "983134727124", appId: "1:983134727124:web:25914abca24ac1d1dd0441" };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    let uData = null;
+
+    function setMode(m) {
+        mode = m;
+        document.getElementById('tab-num').className = m === 'number' ? 'tab-btn active' : 'tab-btn';
+        document.getElementById('tab-cnic').className = m === 'cnic' ? 'tab-btn active' : 'tab-btn';
+        document.getElementById('targetInput').placeholder = m === 'number' ? "03XXXXXXXXX" : "Enter 13 Digit CNIC";
+    }
+
+    async function handleAuth() {
+        const e = document.getElementById('email').value, p = document.getElementById('password').value;
+        try { await auth.signInWithEmailAndPassword(e, p); } catch(err) { alert(err.message); }
+    }
+
+    auth.onAuthStateChanged(user => {
+        if(user) {
+            document.getElementById('auth-section').style.display = 'none';
+            document.getElementById('app-container').style.display = 'block';
+            db.collection('users').doc(user.uid).onSnapshot(doc => { uData = doc.data(); document.getElementById('u-coins').innerText = uData.coins; });
+        } else {
+            document.getElementById('auth-section').style.display = 'flex';
+            document.getElementById('app-container').style.display = 'none';
+        }
+    });
+
+    async function startSearch() {
+        const val = document.getElementById('targetInput').value;
+        if(val.length < 10) return alert("Invalid Input");
+        if(uData.coins < 1) return alert("NO COINS!");
+
+        document.getElementById('loader').style.display = 'block';
+        ['jazz-wrapper','cert-wrapper','cnic-wrapper','download-btn'].forEach(id => document.getElementById(id).style.display = 'none');
+
+        try {
+            const res = await fetch(`/api/search?number=${val}`);
+            const result = await res.json();
+
+            if (result.success) {
+                await db.collection('users').doc(auth.currentUser.uid).update({ coins: firebase.firestore.FieldValue.increment(-1) });
+                render(result.data, val);
+            }
+        } catch(e) { alert("Server error."); }
+        document.getElementById('loader').style.display = 'none';
+    }
+
+    function render(data, inputVal) {
+        document.getElementById('download-btn').style.display = 'block';
+        
+        if (mode === 'cnic') {
+            document.getElementById('cnic-wrapper').style.display = 'block';
+            document.getElementById('cnic-res-name').innerText = data.n;
+            document.getElementById('cnic-res-id').innerText = data.c;
+            document.getElementById('cnic-res-addr').innerText = data.a;
+        } else {
+            const prefix = inputVal.substring(0, 3) === '03' ? inputVal.substring(1, 4) : inputVal.substring(0, 3);
+            const isJazz = ['300','301','302','303','304','305','306','307','308','309'].includes(prefix);
+            const isZong = ['310','311','312','313','314','315','316','317','318','319','370'].includes(prefix);
+            const isUfone = ['331','332','333','334','335','336','337','338','330'].includes(prefix);
+
+            if(isJazz) {
+                document.getElementById('jazz-wrapper').style.display = 'block';
+                ['j-mob','j-name','j-cnic','j-addr'].forEach((id, i) => document.getElementById(id).innerText = [inputVal, data.n, data.c, data.a][i]);
+            } else {
+                document.getElementById('cert-wrapper').style.display = 'block';
+                document.getElementById('cert-logo-img').src = isZong ? "zong.png" : (isUfone ? "ufone.png" : "telenor.png");
+                ['c-mob','c-name','c-cnic','c-addr'].forEach((id, i) => document.getElementById(id).innerText = [inputVal, data.n, data.c, data.a][i]);
+            }
+        }
+    }
+
+    function downloadPNG() {
+        let active = ['jazz-wrapper','cert-wrapper','cnic-wrapper'].find(id => document.getElementById(id).style.display === 'block');
+        html2canvas(document.getElementById(active), { scale: 3, backgroundColor: "#f4f7fa" }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `Data_Report.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+    }
+</script>
+</body>
+</html>
