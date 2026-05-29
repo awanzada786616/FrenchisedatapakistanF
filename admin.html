@@ -1,55 +1,202 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>WASI ADMIN</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WASI ADMIN | Control Center</title>
+    
+    <!-- Firebase & FontAwesome -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; padding: 40px; }
-        .box { max-width: 500px; margin: auto; background: #fff; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; }
-        button { width: 100%; padding: 15px; background: #00c853; color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 10px; }
+        :root { --primary: #00c853; --blue: #2196f3; --red: #f44336; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; padding: 20px; color: #333; }
+        .container { max-width: 700px; margin: auto; }
+        
+        .header { text-align: center; margin-bottom: 30px; background: var(--primary); color: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,200,83,0.2); }
+        
+        .box { background: #fff; padding: 25px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        h2 { font-size: 18px; margin-bottom: 20px; border-bottom: 2px solid #f4f7f6; padding-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 12px; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--primary); }
+        
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.3s; margin-top: 10px; }
+        .btn-add { background: var(--primary); color: #fff; }
+        .btn-blue { background: var(--blue); color: #fff; }
+        .btn:active { transform: scale(0.98); }
+
+        /* Management List */
+        .item-list { margin-top: 20px; max-height: 300px; overflow-y: auto; padding-right: 5px; }
+        .item { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: #fafafa; border-radius: 12px; margin-bottom: 8px; border: 1px solid #eee; }
+        .info { display: flex; align-items: center; gap: 12px; }
+        .info img, .info i { width: 40px; height: 40px; border-radius: 10px; background: #eee; display: flex; align-items: center; justify-content: center; object-fit: cover; color: var(--primary); font-size: 18px; }
+        
+        .del-btn { background: #ffebee; color: var(--red); border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .del-btn:hover { background: var(--red); color: white; }
+
+        #loading-overlay { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.8); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; }
+        .spin { width: 40px; height: 40px; border: 4px solid #ddd; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h2>Dashboard (Image Tools)</h2>
-        <input type="text" id="dN" placeholder="Tool Name">
-        <input type="text" id="dU" placeholder="URL">
-        <input type="file" id="dF">
-        <button onclick="addDash()">SAVE TO DASHBOARD</button>
-        <hr style="margin: 30px 0; opacity: 0.2;">
-        <h2>Smart Tools (Icon Name)</h2>
-        <input type="text" id="sN" placeholder="Tool Name">
-        <input type="text" id="sU" placeholder="URL">
-        <input type="text" id="sI" placeholder="FAF Icon (e.g., fas fa-robot)">
-        <button style="background: #2196F3;" onclick="addSmart()">SAVE TO SMART TOOLS</button>
+
+    <div id="loading-overlay"><div class="spin"></div><p style="margin-top:10px; font-weight:bold;">Uploading to ImgBB...</p></div>
+
+    <div class="container">
+        <div class="header">
+            <h1>Wasi Toolkit Master Admin</h1>
+            <p>Add & Manage Your System</p>
+        </div>
+
+        <!-- ADD DASHBOARD TOOL -->
+        <div class="box">
+            <h2><i class="fas fa-plus-circle"></i> Add Dashboard Tool (Image)</h2>
+            <input type="text" id="dN" placeholder="Tool Name (e.g. WhatsApp Video)">
+            <input type="text" id="dU" placeholder="Direct Tool URL (Link)">
+            <p style="font-size: 12px; color: #888; margin-bottom: 5px;">Upload Tool Icon:</p>
+            <input type="file" id="dF" accept="image/*">
+            <button class="btn btn-add" onclick="addDash()">UPLOAD & SAVE TOOL</button>
+
+            <div class="item-list" id="dash-manage-list">Loading tools...</div>
+        </div>
+
+        <!-- ADD SMART TOOL -->
+        <div class="box">
+            <h2><i class="fas fa-magic"></i> Add Smart Tool (Icon)</h2>
+            <input type="text" id="sN" placeholder="Tool Name (e.g. QR Scanner)">
+            <input type="text" id="sU" placeholder="Direct Tool URL (Link)">
+            <input type="text" id="sI" placeholder="FontAwesome Icon Class (e.g. fas fa-qrcode)">
+            <button class="btn btn-blue" onclick="addSmart()">SAVE SMART TOOL</button>
+
+            <div class="item-list" id="smart-manage-list">Loading tools...</div>
+        </div>
+
+        <!-- BUG REPORTS -->
+        <div class="box">
+            <h2><i class="fas fa-bug"></i> User Bug Reports</h2>
+            <div id="bug-manage-list">No reports yet.</div>
+        </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <script>
-        const firebaseConfig = { apiKey: "AIzaSyCRynFc2PkgbFB5-Pn61PIw6UpkBnKEz_0", projectId: "waisi-chats", appId: "1:867838019932:web:c018a8af2fbc2718551999" };
+        // --- KEYS INJECTED ---
+        var firebaseConfig = { 
+            apiKey: "AIzaSyCRynFc2PkgbFB5-Pn61PIw6UpkBnKEz_0", 
+            projectId: "waisi-chats", 
+            appId: "1:867838019932:web:c018a8af2fbc2718551999" 
+        };
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const IMGBB_KEY = "6015ce7b66862fcecf4d839bf2a1feae";
+        var db = firebase.firestore();
+        var IMGBB_KEY = "6015ce7b66862fcecf4d839bf2a1feae";
 
+        // --- FUNCTIONS ---
+
+        // 1. ADD DASHBOARD TOOL (IMAGE UPLOAD)
         async function addDash() {
-            const name = document.getElementById('dN').value;
-            const url = document.getElementById('dU').value;
-            const file = document.getElementById('dF').files[0];
-            const fd = new FormData(); fd.append("image", file);
-            const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {method:"POST", body:fd});
-            const data = await res.json();
-            await db.collection("dash_tools").add({ name, url, img: data.data.url, time: new Date() });
-            alert("Dashboard Updated!");
+            var name = document.getElementById('dN').value;
+            var url = document.getElementById('dU').value;
+            var file = document.getElementById('dF').files[0];
+            
+            if(!name || !url || !file) return alert("Fill all fields!");
+
+            document.getElementById('loading-overlay').style.display = 'flex';
+            
+            var fd = new FormData();
+            fd.append("image", file);
+
+            try {
+                var res = await fetch("https://api.imgbb.com/1/upload?key=" + IMGBB_KEY, { method: "POST", body: fd });
+                var data = await res.json();
+                var imgUrl = data.data.url;
+
+                await db.collection("dash_tools").add({
+                    name: name,
+                    url: url,
+                    img: imgUrl,
+                    time: new Date()
+                });
+
+                alert("Dashboard Tool Added!");
+                document.getElementById('dN').value = ""; document.getElementById('dU').value = "";
+            } catch(e) { alert("Error: " + e); }
+            document.getElementById('loading-overlay').style.display = 'none';
         }
 
+        // 2. ADD SMART TOOL (ICON)
         async function addSmart() {
-            const name = document.getElementById('sN').value;
-            const url = document.getElementById('sU').value;
-            const icon = document.getElementById('sI').value;
-            await db.collection("smart_tools").add({ name, url, icon });
+            var name = document.getElementById('sN').value;
+            var url = document.getElementById('sU').value;
+            var icon = document.getElementById('sI').value;
+
+            if(!name || !url || !icon) return alert("Fill all fields!");
+
+            await db.collection("smart_tools").add({
+                name: name,
+                url: url,
+                icon: icon
+            });
+
             alert("Smart Tool Added!");
+            document.getElementById('sN').value = ""; document.getElementById('sU').value = ""; document.getElementById('sI').value = "";
         }
+
+        // 3. LOAD & MANAGE (DELETE)
+        function loadManagement() {
+            // Dashboard List
+            db.collection("dash_tools").onSnapshot(function(snap) {
+                var list = document.getElementById('dash-manage-list');
+                list.innerHTML = "";
+                snap.forEach(function(doc) {
+                    var t = doc.data();
+                    list.innerHTML += `<div class="item">
+                        <div class="info"><img src="${t.img}"><div style="font-size:13px"><b>${t.name}</b></div></div>
+                        <button class="del-btn" onclick="delDoc('dash_tools','${doc.id}')">DEL</button>
+                    </div>`;
+                });
+            });
+
+            // Smart Tools List
+            db.collection("smart_tools").onSnapshot(function(snap) {
+                var list = document.getElementById('smart-manage-list');
+                list.innerHTML = "";
+                snap.forEach(function(doc) {
+                    var t = doc.data();
+                    list.innerHTML += `<div class="item">
+                        <div class="info"><i class="${t.icon}"></i><div style="font-size:13px"><b>${t.name}</b></div></div>
+                        <button class="del-btn" onclick="delDoc('smart_tools','${doc.id}')">DEL</button>
+                    </div>`;
+                });
+            });
+
+            // Bugs List
+            db.collection("bugs").onSnapshot(function(snap) {
+                var list = document.getElementById('bug-manage-list');
+                list.innerHTML = "";
+                snap.forEach(function(doc) {
+                    var b = doc.data();
+                    list.innerHTML += `<div class="item" style="flex-direction:column; align-items:flex-start; gap:10px;">
+                        <div style="font-size:12px; color:#555;"><b>Bug:</b> ${b.desc}</div>
+                        <img src="${b.img}" style="width:100px; height:auto; border-radius:5px;">
+                        <button class="del-btn" style="width:100%" onclick="delDoc('bugs','${doc.id}')">DELETE REPORT</button>
+                    </div>`;
+                });
+            });
+        }
+
+        // 4. DELETE LOGIC
+        function delDoc(col, id) {
+            if(confirm("Confirm Delete?")) {
+                db.collection(col).doc(id).delete().then(function() {
+                    alert("Deleted!");
+                });
+            }
+        }
+
+        window.onload = loadManagement;
     </script>
 </body>
 </html>
