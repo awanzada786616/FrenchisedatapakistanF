@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WASI ADMIN</title>
+    <style>
+        body { font-family: sans-serif; background: #f0f2f5; padding: 40px; }
+        .box { max-width: 500px; margin: auto; background: #fff; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; }
+        button { width: 100%; padding: 15px; background: #00c853; color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>Dashboard (Image Tools)</h2>
+        <input type="text" id="dN" placeholder="Tool Name">
+        <input type="text" id="dU" placeholder="URL">
+        <input type="file" id="dF">
+        <button onclick="addDash()">SAVE TO DASHBOARD</button>
+        <hr style="margin: 30px 0; opacity: 0.2;">
+        <h2>Smart Tools (Icon Name)</h2>
+        <input type="text" id="sN" placeholder="Tool Name">
+        <input type="text" id="sU" placeholder="URL">
+        <input type="text" id="sI" placeholder="FAF Icon (e.g., fas fa-robot)">
+        <button style="background: #2196F3;" onclick="addSmart()">SAVE TO SMART TOOLS</button>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script>
+        const firebaseConfig = { apiKey: "AIzaSyCRynFc2PkgbFB5-Pn61PIw6UpkBnKEz_0", projectId: "waisi-chats", appId: "1:867838019932:web:c018a8af2fbc2718551999" };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const IMGBB_KEY = "6015ce7b66862fcecf4d839bf2a1feae";
+
+        async function addDash() {
+            const name = document.getElementById('dN').value;
+            const url = document.getElementById('dU').value;
+            const file = document.getElementById('dF').files[0];
+            const fd = new FormData(); fd.append("image", file);
+            const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {method:"POST", body:fd});
+            const data = await res.json();
+            await db.collection("dash_tools").add({ name, url, img: data.data.url, time: new Date() });
+            alert("Dashboard Updated!");
+        }
+
+        async function addSmart() {
+            const name = document.getElementById('sN').value;
+            const url = document.getElementById('sU').value;
+            const icon = document.getElementById('sI').value;
+            await db.collection("smart_tools").add({ name, url, icon });
+            alert("Smart Tool Added!");
+        }
+    </script>
+</body>
+</html>
